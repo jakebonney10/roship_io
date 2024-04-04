@@ -1,47 +1,37 @@
 #pragma once
 
 #include "transport_interface.hpp"
-
+#include <mosquitto.h>
 #include <string>
 #include <vector>
 #include <functional>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <cstring>
-#include <stdexcept>
-#include <cstring>  // For strerror
-#include <sstream>  // For std::ostringstream
-#include <fcntl.h>  // For fcntl
-
+#include <memory>
 
 TRANSPORT_NS_HEAD
 
-class UdpSocket : public TransportInterface {
- public:
-  struct Params{
-    std::vector<std::string> dst_hosts;
-    std::vector<long int>         dst_ports;
-    int buffer_size;
-    int port;
-  };
-  UdpSocket(Params params);
-  ~UdpSocket();
-  void send(const std::vector<byte>& message);
-  void sendTo(const std::string& ip, int port, const std::vector<byte>& message);
-  void spinOnce();
-  void addCallback(const MessageCallback& callback);
+class MqttClient : public TransportInterface {
+public:
+    struct Params {
+        std::string host;
+        int port;
+        std::vector<std::string> topics;
+        int keep_alive;
+    };
 
- private:
-  Params params_;
-  int sockfd_;
-  size_t buffer_size_;
-  struct sockaddr_in addr_;
-  std::vector<MessageCallback> callbacks_;
-  byte* buffer_;
+    MqttClient(const Params& params);
+    ~MqttClient();
+    void send(const std::vector<byte>& message) override;
+    void spinOnce() override;
+    void addCallback(const MessageCallback& callback) override;
 
+private:
+    static void on_connect(struct mosquitto* mosq, void* userdata, int result);
+    static void on_message(struct mosquitto* mosq, void* userdata, const struct mosquitto_message* message);
+    static void on_disconnect(struct mosquitto* mosq, void* userdata, int reason);
+
+    Params params_;
+    struct mosquitto* mosq_;
+    std::vector<MessageCallback> callbacks_;
 };
 
 TRANSPORT_NS_FOOT

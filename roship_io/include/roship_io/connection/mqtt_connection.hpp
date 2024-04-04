@@ -1,44 +1,38 @@
-#pragma once  // Favor using this over the #ifndef, #define method
+#pragma once
 
-
-// First include your local package stuff
-#include "connection_defs.hpp"  //  This is where we include all our namespace stuff for the package
+#include "connection_defs.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include "io_connection.hpp"
-#include "transport/udp_socket.hpp"
-
+#include "transport/mqtt_client.hpp"
 #include <io_interfaces/msg/raw_packet.hpp>
-
 
 CONNECTION_NS_HEAD
 
-class UdpConnection : public IoConnection<transport::UdpSocket>
+class MqttConnection : public IoConnection<transport::MqttClient>
 {
 public:
-  struct Params
-  {
-    Params();
-    void declare(rclcpp::Node::SharedPtr node);
-    void update(rclcpp::Node::SharedPtr node);
-    transport::UdpSocket::Params sock;
-  };
+    struct Params
+    {
+        Params();
+        void declare(rclcpp::Node::SharedPtr node);
+        void update(rclcpp::Node::SharedPtr node);
+        transport::MqttClient::Params client;
+    };
 
-  UdpConnection(rclcpp::Node::SharedPtr node);
+    MqttConnection(rclcpp::Node::SharedPtr node);
 
-  void udpCallback(const std::vector<byte>& datagram);
+    void mqttCallback(const std::vector<byte>& message);
 
-  void sendToDevice(const io_interfaces::msg::RawPacket msg);
+    void sendToDevice(const io_interfaces::msg::RawPacket& msg);
 
-  void spin_once();
-
+    void spin_once();
 
 protected:
-  rclcpp::TimerBase::SharedPtr          timer_;
-  std::shared_ptr<transport::UdpSocket> sock_ptr_;
-  rclcpp::Publisher<io_interfaces::msg::RawPacket>::SharedPtr raw_pub_;
-  rclcpp::Subscription<io_interfaces::msg::RawPacket>::SharedPtr raw_sub_;
-  Params params_;
-
+    rclcpp::TimerBase::SharedPtr timer_;
+    std::shared_ptr<transport::MqttClient> client_ptr_;
+    rclcpp::Publisher<io_interfaces::msg::RawPacket>::SharedPtr raw_pub_;
+    rclcpp::Subscription<io_interfaces::msg::RawPacket>::SharedPtr raw_sub_;
+    Params params_;
 };
 
 CONNECTION_NS_FOOT
