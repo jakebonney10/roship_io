@@ -6,6 +6,8 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <iostream>
+#include <stdexcept>
 
 TRANSPORT_NS_HEAD
 
