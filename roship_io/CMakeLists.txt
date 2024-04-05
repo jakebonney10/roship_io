@@ -26,6 +26,7 @@ project(${PACKAGE_NAME})  ## this package name is the name of the directory this
 # Find libserialport using pkg-config
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSERIALPORT REQUIRED libserialport)
+pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
 
 add_compile_definitions(CMAKE_PACKAGE_NAME=${PACKAGE_NAME})
 
@@ -79,8 +80,8 @@ foreach(NODE_FILE ${NODES})
   list(APPEND EXECUTABLES ${NODE_NAME})
   add_executable(${NODE_NAME} ${NODE_FILE} ${HDRS} ${SRCS})
   ament_target_dependencies(${NODE_NAME} ${ROS_DEPENDS} ${EXTERNAL_DEPENDS_LIB})
-  target_include_directories(${NODE_NAME} PRIVATE "include/${PROJECT_NAME}/" ${LIBSERIALPORT_INCLUDE_DIRS})
-  target_link_libraries(${NODE_NAME} ${LIBSERIALPORT_LIBRARIES})
+  target_include_directories(${NODE_NAME} PRIVATE "include/${PROJECT_NAME}/" ${LIBSERIALPORT_INCLUDE_DIRS} ${MOSQUITTO_INCLUDE_DIRS})
+  target_link_libraries(${NODE_NAME} ${LIBSERIALPORT_LIBRARIES} ${MOSQUITTO_LIBRARIES})
 endforeach(NODE_FILE)
 
 message("  Installing: " ${EXECUTABLES})
