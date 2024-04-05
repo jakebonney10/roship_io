@@ -8,7 +8,7 @@ MqttConnection::Params::Params()
 {
     client.host = "localhost";
     client.port = 1883;
-    client.topics = {"topic1", "topic2"};
+    client.topics = {"test/topic"};
     client.keep_alive = 60;
 }
 

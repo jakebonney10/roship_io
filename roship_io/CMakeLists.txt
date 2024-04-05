@@ -91,6 +91,7 @@ install(TARGETS
 )
 install(PROGRAMS
   scripts/replay_pcap.sh
+  scripts/mqtt_test.sh
   DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY
