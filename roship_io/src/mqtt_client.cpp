@@ -45,6 +45,13 @@ void MqttClient::send(const std::vector<byte>& message) {
     }
 }
 
+void MqttClient::send(const std::string& topic, const std::vector<byte>& message) {
+    int ret = mosquitto_publish(mosq_, nullptr, topic.c_str(), message.size(), message.data(), 0, false);
+    if (ret != MOSQ_ERR_SUCCESS) {
+        throw std::runtime_error("Failed to publish message: " + std::string(mosquitto_strerror(ret)));
+    }
+}
+
 void MqttClient::spinOnce() {
     int ret = mosquitto_loop(mosq_, 0, 1);
     if (ret != MOSQ_ERR_SUCCESS) {

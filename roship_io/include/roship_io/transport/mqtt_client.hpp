@@ -23,6 +23,7 @@ public:
     MqttClient(const Params& params);
     ~MqttClient();
     void send(const std::vector<byte>& message) override;
+    void send(const std::string& topic, const std::vector<byte>& message); // Overloaded function with topic
     void spinOnce() override;
     void addCallback(const MessageCallback& callback) override;
 
