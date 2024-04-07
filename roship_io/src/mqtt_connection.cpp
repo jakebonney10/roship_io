@@ -38,8 +38,8 @@ MqttConnection::MqttConnection(rclcpp::Node::SharedPtr node) :
     client_ptr_->addMqttCallback(std::bind(&MqttConnection::mqttCallback, this, std::placeholders::_1, std::placeholders::_2));
 
     for (const auto& topic : params_.client.topics) {
-        std::string ros_to_device_topic = "from_device/" + topic;
-        std::string ros_from_device_topic = "to_device/" + topic;
+        std::string ros_to_device_topic = "~/from_device/" + topic;
+        std::string ros_from_device_topic = "~/to_device/" + topic;
 
         ros_publishers_[ros_to_device_topic] = node_ptr_->create_publisher<io_interfaces::msg::RawPacket>(ros_to_device_topic, 10);
         ros_subscribers_[ros_from_device_topic] = node_ptr_->create_subscription<io_interfaces::msg::RawPacket>(
@@ -57,8 +57,9 @@ MqttConnection::MqttConnection(rclcpp::Node::SharedPtr node) :
 
 void MqttConnection::mqttCallback(const std::vector<byte>& message, const std::string& topic)
 {
-    RCLCPP_INFO(node_ptr_->get_logger(), "Received message on topic %s", topic.c_str());
-    auto ros_topic = "from_device/" + topic;
+    std::string message_str(message.begin(), message.end());
+    RCLCPP_DEBUG(node_ptr_->get_logger(), "Recieved message %s from topic %s", message_str.c_str(), topic.c_str());
+    auto ros_topic = "~/from_device/" + topic;
     auto it = ros_publishers_.find(ros_topic);
     if (it != ros_publishers_.end()) {
         auto rx_time = node_ptr_->now();
@@ -71,6 +72,8 @@ void MqttConnection::mqttCallback(const std::vector<byte>& message, const std::s
 
 void MqttConnection::sendToDevice(const io_interfaces::msg::RawPacket& msg, const std::string& topic)
 {
+    std::string message_str(msg.data.begin(), msg.data.end());
+    RCLCPP_DEBUG(node_ptr_->get_logger(), "Sending message %s to topic %s", message_str.c_str(), topic.c_str());
     client_ptr_->send(topic, msg.data);
 }
 
