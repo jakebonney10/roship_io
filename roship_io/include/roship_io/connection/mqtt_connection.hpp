@@ -21,15 +21,20 @@ public:
 
     MqttConnection(rclcpp::Node::SharedPtr node);
 
-    void mqttCallback(const std::vector<byte>& message);
+    void mqttCallback(const std::vector<byte>& message, const std::string& topic);
 
-    void sendToDevice(const io_interfaces::msg::RawPacket& msg);
+    void sendToDevice(const io_interfaces::msg::RawPacket& msg, const std::string& topic);
 
     void spin_once();
 
 protected:
     rclcpp::TimerBase::SharedPtr timer_;
     std::shared_ptr<transport::MqttClient> client_ptr_;
+
+    // Add maps to store ROS2 publishers and subscribers for each topic
+    std::map<std::string, rclcpp::Publisher<io_interfaces::msg::RawPacket>::SharedPtr> ros_publishers_;
+    std::map<std::string, rclcpp::Subscription<io_interfaces::msg::RawPacket>::SharedPtr> ros_subscribers_;
+
     rclcpp::Publisher<io_interfaces::msg::RawPacket>::SharedPtr raw_pub_;
     rclcpp::Subscription<io_interfaces::msg::RawPacket>::SharedPtr raw_sub_;
     Params params_;

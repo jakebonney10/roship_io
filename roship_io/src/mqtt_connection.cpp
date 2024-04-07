@@ -8,7 +8,7 @@ MqttConnection::Params::Params()
 {
     client.host = "localhost";
     client.port = 1883;
-    client.topics = {"test/topic"};
+    client.topics = {"topic1", "topic2", "topic3"};
     client.keep_alive = 60;
 }
 
@@ -35,11 +35,18 @@ MqttConnection::MqttConnection(rclcpp::Node::SharedPtr node) :
     params_.update(node_ptr_);
 
     client_ptr_.reset(new transport::MqttClient(params_.client));
-    client_ptr_->addCallback(std::bind(&MqttConnection::mqttCallback, this, std::placeholders::_1));
+    client_ptr_->addMqttCallback(std::bind(&MqttConnection::mqttCallback, this, std::placeholders::_1, std::placeholders::_2));
 
-    raw_pub_ = node_ptr_->create_publisher<io_interfaces::msg::RawPacket>("~/from_device", 10);
-    raw_sub_ = node_ptr_->create_subscription<io_interfaces::msg::RawPacket>(
-        "~/to_device", 1, std::bind(&MqttConnection::sendToDevice, this, std::placeholders::_1));
+    for (const auto& topic : params_.client.topics) {
+        std::string ros_to_device_topic = "from_device/" + topic;
+        std::string ros_from_device_topic = "to_device/" + topic;
+
+        ros_publishers_[ros_to_device_topic] = node_ptr_->create_publisher<io_interfaces::msg::RawPacket>(ros_to_device_topic, 10);
+        ros_subscribers_[ros_from_device_topic] = node_ptr_->create_subscription<io_interfaces::msg::RawPacket>(
+            ros_from_device_topic, 1, [this, topic](const io_interfaces::msg::RawPacket::SharedPtr msg) {
+                sendToDevice(*msg, topic);
+            });
+    }
 
     timer_ = node_ptr_->create_wall_timer(
         1ms, std::bind(&MqttConnection::spin_once, this));
@@ -48,19 +55,23 @@ MqttConnection::MqttConnection(rclcpp::Node::SharedPtr node) :
                 params_.client.host.c_str(), params_.client.port);
 }
 
-void MqttConnection::mqttCallback(const std::vector<byte>& message)
+void MqttConnection::mqttCallback(const std::vector<byte>& message, const std::string& topic)
 {
-    auto rx_time = node_ptr_->now();
-    io_interfaces::msg::RawPacket::SharedPtr msg(new io_interfaces::msg::RawPacket);
-    msg->header.stamp = rx_time;
-    msg->data = message;
-    raw_pub_->publish(*msg);
+    RCLCPP_INFO(node_ptr_->get_logger(), "Received message on topic %s", topic.c_str());
+    auto ros_topic = "from_device/" + topic;
+    auto it = ros_publishers_.find(ros_topic);
+    if (it != ros_publishers_.end()) {
+        auto rx_time = node_ptr_->now();
+        io_interfaces::msg::RawPacket msg;
+        msg.header.stamp = rx_time;
+        msg.data = message;
+        it->second->publish(msg);
+    }
 }
 
-void MqttConnection::sendToDevice(const io_interfaces::msg::RawPacket& msg)
+void MqttConnection::sendToDevice(const io_interfaces::msg::RawPacket& msg, const std::string& topic)
 {
-    // Publish to an MQTT topic, might need to specify the topic here or manage it some other way
-    client_ptr_->send(msg.data);
+    client_ptr_->send(topic, msg.data);
 }
 
 void MqttConnection::spin_once()

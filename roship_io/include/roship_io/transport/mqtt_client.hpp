@@ -20,12 +20,16 @@ public:
         int keep_alive;
     };
 
+    using MqttMessageCallback = std::function<void(const std::vector<byte>&, const std::string& )>;
+
     MqttClient(const Params& params);
     ~MqttClient();
     void send(const std::vector<byte>& message) override;
     void send(const std::string& topic, const std::vector<byte>& message); // Overloaded function with topic
     void spinOnce() override;
     void addCallback(const MessageCallback& callback) override;
+    void addMqttCallback(const MqttMessageCallback& callback);
+
 
 private:
     static void on_connect(struct mosquitto* mosq, void* userdata, int result);
@@ -35,6 +39,8 @@ private:
     Params params_;
     struct mosquitto* mosq_;
     std::vector<MessageCallback> callbacks_;
+    std::vector<MqttMessageCallback> mqtt_callbacks_;
+
 };
 
 TRANSPORT_NS_FOOT

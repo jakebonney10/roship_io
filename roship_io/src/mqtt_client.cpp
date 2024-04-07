@@ -63,6 +63,10 @@ void MqttClient::addCallback(const MessageCallback& callback) {
     callbacks_.push_back(callback);
 }
 
+void MqttClient::addMqttCallback(const MqttMessageCallback& callback) {
+    mqtt_callbacks_.push_back(callback);
+}
+
 void MqttClient::on_connect(struct mosquitto* mosq, void* userdata, int result) {
     MqttClient* client = static_cast<MqttClient*>(userdata);
     if (client && result == MOSQ_ERR_SUCCESS) {
@@ -76,8 +80,9 @@ void MqttClient::on_message(struct mosquitto* mosq, void* userdata, const struct
     MqttClient* client = static_cast<MqttClient*>(userdata);
     if (client) {
         std::vector<byte> payload(static_cast<byte*>(message->payload), static_cast<byte*>(message->payload) + message->payloadlen);
-        for (const auto& callback : client->callbacks_) {
-            callback(payload);
+        std::string topic(message->topic);
+        for (const auto& callback : client->mqtt_callbacks_) {
+            callback(payload, topic);
         }
     }
 }
