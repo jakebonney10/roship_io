@@ -6,7 +6,7 @@
 ///
 
 #define CONNECTION_NS_HEAD  \
-  NS_HEAD namespace connection {
+  ROSHIP_IO_NS_HEAD namespace connection {
 
 #define CONNECTION_NS_FOOT  \
   NS_FOOT }

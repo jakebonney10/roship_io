@@ -5,6 +5,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include <io_interfaces/msg/raw_packet.hpp>
+#include "modbus/modbus.hpp"
 
 using namespace std::chrono_literals;
 

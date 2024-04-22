@@ -6,7 +6,7 @@
 ///
 
 #define TRANSPORT_NS_HEAD  \
-  NS_HEAD namespace transport {
+  ROSHIP_IO_NS_HEAD namespace transport {
 
 #define TRANSPORT_NS_FOOT  \
   NS_FOOT }
