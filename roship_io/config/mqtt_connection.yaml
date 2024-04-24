@@ -1,0 +1,10 @@
+/**:
+  ros__parameters:
+    client:
+      host: "localhost"
+      port: 1883
+      topics:
+        - "topic1"
+        - "topic2"
+        - "topic3"
+      keep_alive: 60
