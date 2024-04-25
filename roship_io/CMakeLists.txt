@@ -15,7 +15,7 @@ set(EXTERNAL_DEPENDS
 
   )
 
-# Find the libmodbus package
+# Setup PkgConfig Modules
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBMODBUS REQUIRED libmodbus)
 pkg_check_modules(LIBSERIALPORT REQUIRED libserialport)
@@ -28,13 +28,13 @@ set(EXTERNAL_DEPENDS_LIB
   ${MOSQUITTO_LIBRARIES}
 )
 
+###
+###  Avoid editing below this line
+###
 
 get_filename_component(PACKAGE_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 message("Creating Package: ${PACKAGE_NAME}")
 project(${PACKAGE_NAME})  ## this package name is the name of the directory this cmake file is in
-
-
-
 
 add_compile_definitions(CMAKE_PACKAGE_NAME=${PACKAGE_NAME})
 
