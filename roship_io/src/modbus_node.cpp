@@ -7,6 +7,8 @@ MODBUS_NS_HEAD
 ModbusNode::ModbusNode(std::string name)
     : Node(name)
 {
+  params_.declare(this);
+  params_.update(this);
   timer_ = this->create_wall_timer(
       500ms, std::bind(&ModbusNode::timer_callback, this));
   connect_timer_ = this->create_wall_timer(
@@ -14,23 +16,27 @@ ModbusNode::ModbusNode(std::string name)
   connect();
 }
 
-void ModbusNode::readInputRegisters(Block &block)
+bool ModbusNode::readInputRegisters(Block &block)
 {
   try{
     modbus_.read_input_registers(block);
+    return true;
   }catch(std::runtime_error err){
     std::string error_msg = err.what();
-    RCLCPP_WARN(this->get_logger(),"modbus read failed: ", error_msg.c_str());
+    RCLCPP_WARN(this->get_logger(),"modbus read failed: %s", error_msg.c_str());
+    return false;
   }
 }
 
-void ModbusNode::writeRegisters(Block &block)
+bool ModbusNode::writeRegisters(Block &block)
 {
   try{
     modbus_.write_registers(block);
+    return true;
   }catch(std::runtime_error err){
     std::string error_msg = err.what();
-    RCLCPP_WARN(this->get_logger(),"modbus write failed: ", error_msg.c_str());
+    RCLCPP_WARN(this->get_logger(),"modbus write failed: %s", error_msg.c_str());
+    return false;
   }
 }
 
@@ -51,6 +57,10 @@ void ModbusNode::connect()
     connect_timer_->reset();
     connected_ = true;
     RCLCPP_INFO(this->get_logger(),"Connected!");
+
+    //modbus_.set_response_timout(1,params_.connection.response_timout_ms*1000);
+
+
   }catch(std::runtime_error err){
     connected_ = false;
     std::string error_msg = err.what();
@@ -63,6 +73,32 @@ void ModbusNode::timer_callback()
   if(connected_){
     onPoll();
   }
+}
+
+void ModbusNode::Params::declare(rclcpp::Node *node)
+{
+  // Declare parameters for the 'timers' struct
+  node->declare_parameter("timers.poll_ms", timers.poll_ms);
+  node->declare_parameter("timers.connect_ms", timers.connect_ms);
+  node->declare_parameter("timers.write_ms", timers.write_ms);
+
+  // Declare parameters for the 'connection' struct
+  node->declare_parameter("connection.type", connection.type);
+  node->declare_parameter("connection.ip", connection.ip);
+  node->declare_parameter("connection.network_port", connection.network_port);
+}
+
+void ModbusNode::Params::update(rclcpp::Node *node)
+{
+  // Update parameters for the 'timers' struct
+  node->get_parameter("timers.poll_ms", timers.poll_ms);
+  node->get_parameter("timers.connect_ms", timers.connect_ms);
+  node->get_parameter("timers.write_ms", timers.write_ms);
+
+  // Update parameters for the 'connection' struct
+  node->get_parameter("connection.type", connection.type);
+  node->get_parameter("connection.ip", connection.ip);
+  node->get_parameter("connection.network_port", connection.network_port);
 }
 
 MODBUS_NS_FOOT

@@ -32,14 +32,15 @@ public:
       std::string type = "tcp";
       std::string ip   = "192.168.52.209";
       int network_port = 502;
+      int response_timout_ms = 500;
     }connection;
 
     void declare(rclcpp::Node * node);
     void update(rclcpp::Node * node);
   };
   ModbusNode(std::string name = "modbus_connection");
-  void readInputRegisters(Block & block);
-  void writeRegisters(Block & block);
+  bool readInputRegisters(Block & block);
+  bool writeRegisters(Block & block);
 
 protected:
   void timer_callback();
