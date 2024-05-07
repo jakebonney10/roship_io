@@ -4,9 +4,16 @@
 
   <arg name="device_name"       default="udp_device"/>
   <arg name="namespace"         default=""/>
+  <arg name="buffer_size"       default="1024"/>
+  <arg name="dst_hosts"         default="[127.0.0.1]"/>
+  <arg name="dst_ports"         default="[4321]"/>
+  <arg name="port"              default="1234"/>
 
-  <node pkg="roship_io" exec="udp_connection" name="udp_device" namespace="$(var namespace)">
-    <param from="$(find-pkg-share roship_io)/config/udp_connection.yaml"/>
+  <node pkg="roship_io" exec="udp_connection" name="$(var device_name)" namespace="$(var namespace)">
+    <param name="sock.buffer_size" value="$(var buffer_size)"/>
+    <param name="sock.dst_hosts" value="$(var dst_hosts)"/>
+    <param name="sock.dst_ports" value="$(var dst_ports)"/>
+    <param name="sock.port"      value="$(var port)"/>
   </node>
 
 </launch>
