@@ -6,6 +6,10 @@
 # ID of the analog channel.  analogs may be indexed from one, zero, or randomly selected.
 int32   channel_id
 
+uint8   type
+uint8   TYPE_VOLTAGE=0
+uint8   TYPE_CURRENT=1
+
 # A scale factor that, when multiplied by the proportional_value, yields
 # the electic potential in volts.  If this value is not known the scale shall
 # be set to 0.0.   This will produce a valid voltage of 0.0 if no checking is

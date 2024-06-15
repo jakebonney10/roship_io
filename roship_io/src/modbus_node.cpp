@@ -10,7 +10,7 @@ ModbusNode::ModbusNode(std::string name)
   params_.declare(this);
   params_.update(this);
   timer_ = this->create_wall_timer(
-      500ms, std::bind(&ModbusNode::timer_callback, this));
+      std::chrono::milliseconds(params_.timers.poll_ms), std::bind(&ModbusNode::timer_callback, this));
   connect_timer_ = this->create_wall_timer(
       std::chrono::milliseconds(params_.timers.connect_ms), std::bind(&ModbusNode::connect, this));
   connect();
