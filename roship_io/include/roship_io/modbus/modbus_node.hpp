@@ -33,6 +33,7 @@ public:
       std::string ip   = "192.168.52.209";
       int network_port = 502;
       int response_timout_ms = 500;
+      int slave_id = 1;
     }connection;
 
     void declare(rclcpp::Node * node);
@@ -40,6 +41,7 @@ public:
   };
   ModbusNode(std::string name = "modbus_connection");
   bool readInputRegisters(Block & block);
+  bool readRegisters(Block & block);
   bool writeRegisters(Block & block);
 
 protected:

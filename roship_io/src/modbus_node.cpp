@@ -24,6 +24,20 @@ bool ModbusNode::readInputRegisters(Block &block)
   }catch(std::runtime_error err){
     std::string error_msg = err.what();
     RCLCPP_WARN(this->get_logger(),"modbus read failed: %s", error_msg.c_str());
+    connected_ = false;
+    return false;
+  }
+}
+
+bool ModbusNode::readRegisters(Block &block)
+{
+  try{
+    modbus_.read_registers(block);
+    return true;
+  }catch(std::runtime_error err){
+    std::string error_msg = err.what();
+    RCLCPP_WARN(this->get_logger(),"modbus read failed: %s", error_msg.c_str());
+    connected_ = false;
     return false;
   }
 }
@@ -36,6 +50,7 @@ bool ModbusNode::writeRegisters(Block &block)
   }catch(std::runtime_error err){
     std::string error_msg = err.what();
     RCLCPP_WARN(this->get_logger(),"modbus write failed: %s", error_msg.c_str());
+    connected_ = false;
     return false;
   }
 }
@@ -59,7 +74,9 @@ void ModbusNode::connect()
     RCLCPP_INFO(this->get_logger(),"Connected!");
 
     //modbus_.set_response_timout(1,params_.connection.response_timout_ms*1000);
+    RCLCPP_INFO(this->get_logger(),"Setting Slave ID: %i", params_.connection.slave_id);
 
+    modbus_.set_slave(params_.connection.slave_id);
 
   }catch(std::runtime_error err){
     connected_ = false;

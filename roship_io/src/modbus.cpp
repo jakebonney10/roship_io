@@ -22,6 +22,10 @@ void Modbus::connect_tcp(const char *ip_address, int port){
   }
 }
 
+void Modbus::set_slave(int id){
+  modbus_set_slave(mb_, id);
+}
+
 void Modbus::read_input_registers(int addr, int nb){
   if ( modbus_read_input_registers(mb_, addr, nb, tab_reg_) == -1){
     throw std::runtime_error("Failed to read input registers: " + std::string(modbus_strerror(errno)));
@@ -32,6 +36,21 @@ void Modbus::read_input_registers(Block & block)
 {
   if ( modbus_read_input_registers(mb_, block.modbusAddress(), block.size(), block.buffer()) == -1){
     throw std::runtime_error("Failed to read input registers: " + std::string(modbus_strerror(errno)));
+  }
+}
+
+void Modbus::read_registers(int addr, int nb) {
+  if ( modbus_read_registers(mb_, addr, nb, tab_reg_) == -1){
+    throw std::runtime_error("Failed to read registers: " + std::string(modbus_strerror(errno)));
+  }
+}
+void Modbus::read_registers(Block &block)
+{
+  auto addr = block.modbusAddress();
+  auto size = block.size();
+  auto mb_value = modbus_read_registers(mb_, addr, size, block.buffer());
+  if ( mb_value == -1){
+    throw std::runtime_error("Failed to read registers: " + std::string(modbus_strerror(errno)));
   }
 }
 

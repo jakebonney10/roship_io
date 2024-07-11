@@ -19,8 +19,11 @@ public:
   Modbus();
   ~Modbus();
   void connect_tcp(const char *ip_address, int port);
+  void set_slave(int id);
   void read_input_registers(int addr, int nb);
   void read_input_registers(Block & block);
+  void read_registers(int addr, int nb);
+  void read_registers(Block & block);
   void write_registers(int addr, int nb, const uint16_t *src);
   void write_registers(Block & block);
   void print_buffer();
